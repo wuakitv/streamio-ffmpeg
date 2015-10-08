@@ -101,9 +101,7 @@ module FFMPEG
         rescue => e
           raise_ffmpeg_exception(e.message, e.backtrace)
         ensure
-          unless wait_thr.value.success?
-            raise_ffmpeg_exception(nil, nil)
-          end
+          raise_ffmpeg_exception(nil, nil) unless wait_thr.value.success?
         end
       end
     end
