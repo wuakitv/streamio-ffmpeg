@@ -21,8 +21,8 @@ module FFMPEG
       @movie = movie
       @output_file = output_file
 
-      assign_input_options(input_options)
-      assign_output_options(options)
+      assign_input_options(input_options) if input_options
+      assign_output_options(options) if options
 
       @transcoder_options = transcoder_options
       @errors = []
@@ -71,15 +71,20 @@ module FFMPEG
     def encoded
       @encoded ||= Movie.new(@output_file)
     end
-
+    
+    def transcode_command
+      return @transcoder_options[:command] if @transcoder_options[:command]
+      cmd = "#{FFMPEG.ffmpeg_binary} -y #{@raw_input_options} " \
+            "-err_detect explode -xerror " \
+            "-i #{Shellwords.escape(@movie.path)} #{@raw_options}"
+      return cmd unless @output_file
+      cmd + Shellwords.escape(@output_file)
+    end
 
     private
     # frame= 4855 fps= 46 q=31.0 size=   45306kB time=00:02:42.28 bitrate=2287.0kbits/
     def transcode_movie(&block)
-      @command = "#{FFMPEG.ffmpeg_binary} -y #{@raw_input_options} " \
-                 "-err_detect explode -xerror " \
-                 "-i #{Shellwords.escape(@movie.path)} #{@raw_options}"
-      @command << Shellwords.escape(@output_file) if @output_file
+      @command = transcode_command
 
       FFMPEG.logger.info("Running transcoding...\n#{@command}\n")
       @output = ""
@@ -142,8 +147,7 @@ module FFMPEG
     def apply_transcoder_options
        # if true runs #validate_output_file
       @transcoder_options[:validate] = @transcoder_options.fetch(:validate) { true }
-
-      return if @movie.calculated_aspect_ratio.nil?
+      return if @transcoder_options[:command] || @movie.calculated_aspect_ratio.nil?
       case @transcoder_options[:preserve_aspect_ratio].to_s
       when "width"
         new_height = @raw_options.width / @movie.calculated_aspect_ratio
@@ -175,3 +179,4 @@ module FFMPEG
     end
   end
 end
+
