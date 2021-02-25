@@ -74,14 +74,22 @@ module FFMPEG
     
     def transcode_command
       return @transcoder_options[:command] if @transcoder_options[:command]
+      
       cmd = "#{FFMPEG.ffmpeg_binary} -y #{@raw_input_options} " \
-            "-err_detect explode -xerror " \
+            "#{detect_errors}" \
             "-i #{Shellwords.escape(@movie.path)} #{@raw_options}"
+      
       return cmd unless @output_file
+      
       cmd + Shellwords.escape(@output_file)
     end
 
     private
+    
+    def detect_errors
+      @transcoder_options[:ignore_errors].to_s == 'true' ? '' : "-err_detect explode -xerror "
+    end
+
     # frame= 4855 fps= 46 q=31.0 size=   45306kB time=00:02:42.28 bitrate=2287.0kbits/
     def transcode_movie(&block)
       @command = transcode_command
