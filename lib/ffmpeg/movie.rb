@@ -54,9 +54,9 @@ module FFMPEG
       end
 
       if audio_stream
-        output[/Stream #.:(.)\((.+)\): Audio/]
+        output[/Stream #.:(.)\[(.+?)\]\((.+)\): Audio/]
         @audio_track_id = $1.to_i
-        @audio_language = $2
+        @audio_language = $3
         @audio_codec, audio_sample_rate, @audio_channels, unused, audio_bitrate = audio_stream.split(/\s?,\s?/)
         @audio_bitrate = audio_bitrate =~ %r(\A(\d+) kb/s) ? $1.to_i : nil
         @audio_sample_rate = audio_sample_rate[/\d*/].to_i
