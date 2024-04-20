@@ -10,7 +10,7 @@ module FFMPEG
     attr_accessor :duration, :audio_language
 
     def initialize(path)
-      raise Errno::ENOENT, "the file '#{path}' does not exist" unless File.exists?(path)
+      raise Errno::ENOENT, "the file '#{path}' does not exist" unless File.exist?(path)
 
       @path = path
 
