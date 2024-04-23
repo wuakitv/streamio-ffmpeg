@@ -74,7 +74,7 @@ module FFMPEG
           transcoder.encoded.should be_valid
           progress_updates.should include(0.0, 1.0)
           progress_updates.length.should >= 3
-          File.exists?("#{tmp_path}/awesome.flv").should be_true
+          File.exist?("#{tmp_path}/awesome.flv").should be_true
         end
 
         it "should transcode the movie with EncodingOptions" do
